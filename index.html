@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>兒童發展聯合評估 基本資料表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF7F1;
+    --card:#FFFFFF;
+    --primary:#1F6F78;
+    --primary-dark:#154D53;
+    --accent:#E8935B;
+    --text:#2B2B29;
+    --text-muted:#767268;
+    --border:#E7E1D5;
+    --danger:#C85C4A;
+    --radius:14px;
+    --shadow:0 2px 10px rgba(43,43,41,0.06);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+  }
+  #topbar{
+    position:sticky; top:0; z-index:20;
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    padding:14px 20px;
+  }
+  #topbar .title{font-weight:700; font-size:15px; color:var(--primary-dark);}
+  #topbar .sub{font-size:12px; color:var(--text-muted); margin-top:2px;}
+  #progress-track{
+    margin-top:10px; height:6px; background:var(--border); border-radius:99px; overflow:hidden;
+  }
+  #progress-bar{
+    height:100%; width:0%; background:linear-gradient(90deg,var(--primary),var(--accent));
+    transition:width .3s ease;
+  }
+  #step-counter{font-size:12px; color:var(--text-muted); margin-top:6px;}
+
+  main{max-width:720px; margin:0 auto; padding:24px 16px 120px;}
+
+  .step{display:none;}
+  .step.active{display:block; animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px 20px;
+    margin-bottom:16px;
+  }
+  .step-title{font-size:19px; font-weight:700; color:var(--primary-dark); margin:0 0 4px;}
+  .step-desc{font-size:13px; color:var(--text-muted); margin:0 0 18px;}
+  .step-desc.must-check{color:var(--danger); font-weight:700; font-size:14px;}
+  .subcard-title .must-check{color:var(--danger); font-weight:700;}
+  .field.field-error{outline:2px solid var(--danger); outline-offset:3px; border-radius:10px;}
+
+  .field{margin-bottom:18px;}
+  .field:last-child{margin-bottom:0;}
+  .field-label{font-weight:600; font-size:14.5px; margin-bottom:8px; display:block; color:var(--text);}
+  .field-hint{font-size:12px; color:var(--text-muted); font-weight:400; margin-left:4px;}
+  .req{color:var(--danger); font-weight:700;}
+
+  input[type=text], input[type=number], input[type=date], textarea, select{
+    width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px;
+    font-family:inherit; font-size:14.5px; background:#FFFDFB; color:var(--text);
+  }
+  input[type=text]:focus, input[type=number]:focus, input[type=date]:focus, textarea:focus, select:focus{
+    outline:2px solid var(--primary); outline-offset:1px; border-color:var(--primary);
+  }
+  textarea{resize:vertical; min-height:70px;}
+
+  .radio-row, .checkbox-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .opt{
+    display:flex; align-items:center; gap:6px;
+    border:1px solid var(--border); border-radius:10px; padding:8px 12px;
+    font-size:14px; cursor:pointer; background:#FFFDFB; transition:.15s;
+  }
+  .opt:has(input:checked){border-color:var(--primary); background:#EAF3F2; color:var(--primary-dark); font-weight:600;}
+  .opt input{accent-color:var(--primary); margin:0;}
+  .sub-input{width:120px !important; margin-left:4px; padding:5px 8px !important; font-size:13px !important;}
+  .sub-input.wide{width:200px !important;}
+
+  .inline-fields{display:flex; flex-wrap:wrap; gap:10px; align-items:center;}
+  .inline-fields .mini{flex:1; min-width:110px;}
+  .row-2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .row-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;}
+  @media (max-width:520px){ .row-2, .row-3{grid-template-columns:1fr;} }
+
+  .subcard{
+    border:1px dashed var(--border); border-radius:12px; padding:14px; margin-top:10px; background:#FCFAF6;
+  }
+  .subcard-title{font-weight:600; font-size:13.5px; color:var(--primary-dark); margin-bottom:10px;}
+
+  .scale-header{display:flex; gap:10px; font-size:11px; color:var(--text-muted); margin-bottom:6px;}
+  .scale-header .scale-header-spacer{flex:1;}
+  .scale-header span{width:34px; text-align:center; line-height:1.3;}
+  .scale-row{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid var(--border);}
+  .scale-row:last-child{border-bottom:none;}
+  .scale-label{font-size:13.5px; flex:1;}
+  .scale-options{display:flex; gap:10px;}
+  .scale-opt{width:34px; display:flex; flex-direction:column; align-items:center; font-size:11px; color:var(--text-muted); cursor:pointer;}
+  .scale-opt input{accent-color:var(--primary); margin:0;}
+
+  .concern-cat{font-weight:700; color:var(--primary-dark); font-size:13px; margin:16px 0 6px; text-transform:none;}
+  .concern-cat:first-child{margin-top:0;}
+
+  .notice{
+    background:#FBF1E6; border:1px solid #EFD9B8; border-radius:12px; padding:14px 16px;
+    font-size:13px; color:#7A5A2A; margin-bottom:18px;
+  }
+  .legal{font-size:13px; color:var(--text-muted); background:#F4F1EA; border-radius:12px; padding:14px 16px; margin-bottom:16px;}
+
+  #navbar{
+    position:fixed; bottom:0; left:0; right:0; background:var(--card);
+    border-top:1px solid var(--border); padding:12px 16px; z-index:20;
+  }
+  #navbar-inner{max-width:720px; margin:0 auto; display:flex; justify-content:space-between; gap:10px;}
+  button{
+    font-family:inherit; font-size:15px; font-weight:600; border-radius:10px; padding:12px 22px;
+    border:none; cursor:pointer; transition:.15s;
+  }
+  #btn-prev{background:#F0EDE6; color:var(--text);}
+  #btn-prev:hover{background:#E7E1D5;}
+  #btn-next, #btn-submit{background:var(--primary); color:#fff;}
+  #btn-next:hover, #btn-submit:hover{background:var(--primary-dark);}
+  #btn-prev:disabled{visibility:hidden;}
+
+  .intro-hero{text-align:center; padding:8px 4px 4px;}
+  .intro-hero h1{font-size:22px; color:var(--primary-dark); margin-bottom:6px;}
+  .intro-hero p{color:var(--text-muted); font-size:14px;}
+  .intro-list{margin:18px 0; padding:0; list-style:none;}
+  .intro-list li{display:flex; gap:10px; padding:8px 0; font-size:14px; align-items:flex-start;}
+  .intro-list .dot{width:22px; height:22px; border-radius:50%; background:var(--primary); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;}
+
+  #done-screen{text-align:center; padding:40px 20px;}
+  #done-screen .check{font-size:52px; margin-bottom:16px;}
+  #done-screen h2{color:var(--primary-dark);}
+
+  #dev-banner{
+    background:#FDECEC; color:#8A2C22; font-size:12.5px; text-align:center; padding:8px; border-bottom:1px solid #F3C9C2;
+  }
+</style>
+</head>
+<body>
+
+<div id="dev-banner">⚠ 尚未設定 Google Apps Script 回傳網址，目前送出的資料不會被儲存。請在 index.html 檔案開頭的 GAS_WEB_APP_URL 填入您部署後的網址。</div>
+
+<div id="topbar">
+  <div class="title">臺北醫學大學附設醫院 · 兒童發展聯合評估 基本資料表</div>
+  <div class="sub" id="section-title-sub">請依實際狀況填寫，填寫過程資料不會外流</div>
+  <div id="progress-track"><div id="progress-bar"></div></div>
+  <div id="step-counter"></div>
+</div>
+
+<main>
+  <form id="mainForm">
+    <div id="steps"></div>
+  </form>
+  <div id="done-screen" style="display:none;">
+    <div class="check">✅</div>
+    <h2>感謝您完成填寫</h2>
+    <p style="color:var(--text-muted);">您的資料已送出，將由職能治療師於評估前先行閱覽，<br>若填寫過程中有任何問題，歡迎於評估當天告訴我們。</p>
+  </div>
+</main>
+
+<div id="navbar">
+  <div id="navbar-inner">
+    <button type="button" id="btn-prev">上一步</button>
+    <button type="button" id="btn-next">下一步</button>
+    <button type="button" id="btn-submit" style="display:none;">送出表單</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   設定區：部署 Google Apps Script Web App 後，將網址貼在下面
+   （若尚未設定，表單仍可測試填寫與換頁，僅送出時不會真正送達）
+   ========================================================= */
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyNW6DVfgdteZ8tirAsRqOwXkX6Dxuulpvf8kI07BjR3c34XqI-g7dv7_JNTegnJCDbkg/exec";
+
+/* =========================================================
+   輔助函式：產生表單元件的 HTML
+   ========================================================= */
+function esc(s){ return String(s).replace(/"/g,'&quot;'); }
+
+function opt(label, extra){ return {label, extra}; }
+// extra = {name, type, placeholder, width}
+
+function renderExtra(extra){
+  if(!extra || !extra.name) return '';
+  const w = extra.width==='wide' ? 'sub-input wide' : 'sub-input';
+  return `<input type="${extra.type||'text'}" name="${extra.name}" placeholder="${esc(extra.placeholder||'')}" class="${w}">`;
+}
+
+function radioGroup(name, title, options, opts={}){
+  let html = `<div class="field"><span class="field-label">${title}${opts.required?' <span class="req">*</span>':''}${opts.hint?` <span class="field-hint">${opts.hint}</span>`:''}</span><div class="radio-row">`;
+  options.forEach((o,i)=>{
+    const label = typeof o==='string' ? o : o.label;
+    const extra = typeof o==='object' ? o.extra : null;
+    html += `<label class="opt"><input type="radio" name="${name}" value="${esc(label)}" ${opts.required?'required':''}>${label}${renderExtra(extra)}</label>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+function checkboxGroup(name, title, options, opts={}){
+  const reqAttr = opts.required ? ` data-required-group="${name}"` : '';
+  let html = `<div class="field"${reqAttr}><span class="field-label">${title}${opts.required?' <span class="req">*</span>':''}${opts.hint?` <span class="field-hint">${opts.hint}</span>`:''}</span><div class="checkbox-row">`;
+  options.forEach((o)=>{
+    const label = typeof o==='string' ? o : o.label;
+    const extra = typeof o==='object' ? o.extra : null;
+    html += `<label class="opt"><input type="checkbox" name="${name}" value="${esc(label)}">${label}${renderExtra(extra)}</label>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+function textField(name, title, opts={}){
+  const type = opts.type||'text';
+  return `<div class="field"><label class="field-label" for="${name}">${title}${opts.required?' <span class="req">*</span>':''}</label>
+    <input type="${type}" id="${name}" name="${name}" placeholder="${esc(opts.placeholder||'')}" ${opts.required?'required':''}></div>`;
+}
+
+function textareaField(name, title, opts={}){
+  return `<div class="field"><label class="field-label" for="${name}">${title}</label>
+    <textarea id="${name}" name="${name}" rows="${opts.rows||3}" placeholder="${esc(opts.placeholder||'')}"></textarea></div>`;
+}
+
+function scaleBlock(title, items, scaleLabels, opts={}){
+  let html = `<div class="field"><span class="field-label">${title}${opts.required?' <span class="req">*</span>':''}</span>`;
+  html += `<div class="scale-header"><span class="scale-header-spacer"></span>` + scaleLabels.map(s=>`<span>${s.short}</span>`).join('') + `</div>`;
+  items.forEach(it=>{
+    html += `<div class="scale-row"><div class="scale-label">${it.label}</div><div class="scale-options">`;
+    scaleLabels.forEach(s=>{
+      html += `<label class="scale-opt"><input type="radio" name="${it.name}" value="${s.value}" ${opts.required?'required':''}><span>${s.value}</span></label>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function therapyDetailBlock(prefix, label){
+  return `<div class="subcard">
+    <div class="subcard-title">${label}</div>
+    <div class="row-2">
+      <div class="field"><label class="field-label" for="therapy_${prefix}_start_age">開始接受療育之年齡</label><input type="text" id="therapy_${prefix}_start_age" name="therapy_${prefix}_start_age" placeholder="歲/個月"></div>
+      <div class="field"><label class="field-label" for="therapy_${prefix}_duration">持續療育多久</label><input type="text" id="therapy_${prefix}_duration" name="therapy_${prefix}_duration" placeholder="年/月"></div>
+    </div>
+    <div class="row-2">
+      <div class="field"><label class="field-label" for="therapy_${prefix}_location">目前療育醫院/診所</label><input type="text" id="therapy_${prefix}_location" name="therapy_${prefix}_location"></div>
+      <div class="field"><label class="field-label" for="therapy_${prefix}_frequency">一週次數</label><input type="number" id="therapy_${prefix}_frequency" name="therapy_${prefix}_frequency"></div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================
+   各步驟內容
+   ========================================================= */
+const steps = [];
+
+// ---------- Step 0：說明頁 ----------
+steps.push({
+  title: "填寫說明",
+  desc: "",
+  html: `
+  <div class="card">
+    <div class="intro-hero">
+      <h1>兒童發展聯合評估<br>基本資料表</h1>
+      <p>臺北醫學大學附設醫院 兒童聯合評估發展中心</p>
+    </div>
+    <ul class="intro-list">
+      <li><span class="dot">1</span>請由家長（建議與評估當天陪同孩子的家長為同一人）填寫，約需 15–20 分鐘。</li>
+      <li><span class="dot">2</span>內容分成數個小節，可以分次填寫、隨時返回上一步修改。</li>
+      <li><span class="dot">3</span>若家中有 2 名以上孩子需要評估，請每位孩子分別填寫一份表單。</li>
+      <li><span class="dot">4</span>本資料僅供評估團隊了解孩子狀況使用，將於評估當天由治療師參考。</li>
+    </ul>
+  </div>`
+});
+
+// ---------- Step 1：填表人基本資料 ----------
+steps.push({
+  title: "填表人基本資料",
+  desc: "您詳細的填寫，有助於我們對孩子的瞭解與評估的進行",
+  html: `
+  <div class="card">
+    ${textField('filler_name','填表人姓名',{required:true})}
+    ${radioGroup('filler_gender','您的性別',['男','女'])}
+    ${radioGroup('filler_relation','您與個案關係',['父親','母親','祖父','祖母','外祖父','外祖母', opt('其它',{name:'filler_relation_other',type:'text',placeholder:'請說明'})])}
+    ${radioGroup('filler_age_range','您的年齡',['20歲以下','21-30歲','30-40歲','41-50歲','50歲以上'])}
+    <div class="field">
+      <span class="field-label">孩子的戶籍地區</span>
+      <div class="inline-fields">
+        <input type="text" class="mini" name="child_reg_city" placeholder="縣/市">
+        <input type="text" class="mini" name="child_reg_district" placeholder="區">
+        <input type="text" class="mini" name="child_reg_other" placeholder="其它（若無上述可填寫）">
+      </div>
+    </div>
+    ${radioGroup('filler_education','您的教育程度',['不識字','國小','初中','國中','高中','高職','專科','大學','研究所'])}
+  </div>`
+});
+
+// ---------- Step 2：父母資訊 + 經濟 + 期待 ----------
+function parentBlock(prefix, label){
+  return `
+  <div class="subcard">
+    <div class="subcard-title">${label}</div>
+    <div class="row-3">
+      <div class="field"><label class="field-label">年齡</label><input type="number" name="${prefix}_age" placeholder="歲"></div>
+      <div class="field"><label class="field-label">工作</label><input type="text" name="${prefix}_job"></div>
+      <div class="field"><label class="field-label">住所</label>
+        <div class="radio-row">
+          <label class="opt"><input type="radio" name="${prefix}_residence" value="台灣">台灣</label>
+          <label class="opt"><input type="radio" name="${prefix}_residence" value="大陸">大陸</label>
+          <label class="opt"><input type="radio" name="${prefix}_residence" value="其它">其它${renderExtra({name:prefix+'_residence_other',type:'text'})}</label>
+        </div>
+      </div>
+    </div>
+    ${checkboxGroup(prefix+'_time_with_child','回家與孩子相處時間',['每日晚飯前','每日晚飯後','假日', opt('其他',{name:prefix+'_time_other',type:'text',placeholder:'請說明'})])}
+  </div>`;
+}
+steps.push({
+  title: "父母資訊 · 經濟狀況 · 期待",
+  desc: "",
+  html: `
+  <div class="card">
+    ${parentBlock('father','父親')}
+    ${parentBlock('mother','母親')}
+  </div>
+  <div class="card">
+    ${checkboxGroup('income_source','經濟來源',['父','母','內/外祖父母', opt('政府補助',{name:'income_gov_amount',type:'number',placeholder:'元/月'}), opt('其他',{name:'income_source_other',type:'text'})])}
+    ${radioGroup('income_status','收支情形',['良好','尚可','收支失衡'])}
+  </div>
+  <div class="card">
+    ${textareaField('concern_worries','對於孩童最擔心的問題為')}
+    ${textareaField('concern_expectation','對於評估或療育的期待')}
+    ${checkboxGroup('concern_help_needed','本次就診希望獲得的協助',['藥物治療','親職諮商','家族治療','心理治療','就學/就業諮詢', opt('其他',{name:'concern_help_other',type:'text'})])}
+  </div>`
+});
+
+// ---------- Step 3：個案基本資料 ----------
+steps.push({
+  title: "個案基本資料",
+  desc: "請填寫接受評估孩子的資料；若有2名以上的孩子，請每位孩子分別填寫一次",
+  html: `
+  <div class="card">
+    <div class="row-2">
+      ${textField('child_name','個案姓名',{required:true})}
+      ${textField('child_dob','出生日期',{type:'date',required:true})}
+    </div>
+    ${radioGroup('child_hand','慣用手',['右手','左手','尚未發展'])}
+    <div class="field">
+      <span class="field-label">居住地址</span>
+      <div class="inline-fields">
+        <input type="text" class="mini" name="addr_city" placeholder="市/縣">
+        <input type="text" class="mini" name="addr_district" placeholder="區">
+        <input type="text" class="mini" name="addr_road" placeholder="路/街">
+        <input type="text" class="mini" name="addr_section" placeholder="段">
+        <input type="text" class="mini" name="addr_lane" placeholder="巷">
+        <input type="text" class="mini" name="addr_alley" placeholder="弄">
+        <input type="text" class="mini" name="addr_number" placeholder="號">
+        <input type="text" class="mini" name="addr_floor" placeholder="樓">
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    ${checkboxGroup('family_members','家中成員',['父','母', opt('兄',{name:'family_brother_count',type:'number',placeholder:'人數'}), opt('弟',{name:'family_younger_brother_count',type:'number',placeholder:'人數'}), opt('姊',{name:'family_sister_count',type:'number',placeholder:'人數'}), opt('妹',{name:'family_younger_sister_count',type:'number',placeholder:'人數'}), '外公','外婆','爺爺','奶奶', opt('其他',{name:'family_other_count',type:'number',placeholder:'人數'})])}
+    ${radioGroup('sibling_delay','手足有無發展遲緩相關問題',['無', opt('有',{name:'sibling_delay_detail',type:'text',placeholder:'請說明'})])}
+    <div class="field">
+      <span class="field-label">目前主要照顧者 <span class="field-hint">（若為同一人，時段可留白）</span></span>
+      <div class="subcard">
+        <div class="inline-fields"><b style="font-size:13px;width:40px;">白天</b><input type="text" class="mini" name="caregiver_day" placeholder="照顧者"><input type="text" class="mini" name="caregiver_day_time" placeholder="時段，如 8:00~18:00"></div>
+        <div class="inline-fields" style="margin-top:8px;"><b style="font-size:13px;width:40px;">晚上</b><input type="text" class="mini" name="caregiver_night" placeholder="照顧者"><input type="text" class="mini" name="caregiver_night_time" placeholder="時段"></div>
+        <div class="inline-fields" style="margin-top:8px;"><b style="font-size:13px;width:40px;">週末</b><input type="text" class="mini" name="caregiver_weekend" placeholder="照顧者"><input type="text" class="mini" name="caregiver_weekend_time" placeholder="時段"></div>
+      </div>
+    </div>
+  </div>`
+});
+
+// ---------- Step 4：懷孕生產史與疾病史 ----------
+steps.push({
+  title: "懷孕生產史 · 疾病史",
+  desc: "",
+  html: `
+  <div class="card">
+    <div class="subcard-title" style="margin-bottom:14px;">母親懷孕時</div>
+    ${textField('pregnancy_mother_age','懷孕時年齡',{type:'number',placeholder:'歲'})}
+    ${radioGroup('pregnancy_illness','孕前本身患病？',['無', opt('有',{name:'pregnancy_illness_detail',type:'text',placeholder:'病名'})])}
+    ${checkboxGroup('pregnancy_conditions','孕期狀況',['安胎', opt('服用藥物',{name:'pregnancy_meds_name',type:'text',placeholder:'藥名'}), '孕期併發症-高血壓', '孕期併發症-尿蛋白', '孕期併發症-高血糖', opt('孕期併發症-其它',{name:'pregnancy_complication_other',type:'text'})])}
+    ${radioGroup('delivery_method','生產方式',['自然產', opt('剖腹產',{name:'delivery_reason',type:'text',placeholder:'原因'})])}
+    <div class="row-2">
+      ${textField('birth_week','孩童出生週數',{type:'number',placeholder:'週'})}
+      ${textField('birth_weight','出生體重',{type:'number',placeholder:'公克'})}
+    </div>
+    ${checkboxGroup('birth_conditions','出生時特殊狀況',['無異常','早產','缺氧','黃疸','住進新生兒加護中心','胎位不正','新生兒抽搐','聽力問題','先天性肢體異常', opt('其它',{name:'birth_condition_other',type:'text'})])}
+  </div>
+  <div class="card">
+    ${checkboxGroup('disease_history','孩童疾病史',[
+      '腦炎/腦膜炎','腸病毒住院','熱痙攣','頭部創傷需留院觀察','缺氧性腦病變','早產合併症(如腦室出血或白質軟化)',
+      '視力問題-近視','視力問題-遠視','視力問題-斜視','視力問題-弱視', opt('視力問題-其他',{name:'vision_other',type:'text'}),
+      opt('癲癇需持續服藥',{name:'epilepsy_detail',type:'text',placeholder:'發作年齡/服藥年數'}),
+      opt('其他重大身體疾病需住院手術',{name:'disease_surgery_detail',type:'text'}),
+      opt('其他遺傳性疾病',{name:'disease_genetic_detail',type:'text',placeholder:'病名'})
+    ])}
+  </div>`
+});
+
+// ---------- Step 5：就學史與發展史 ----------
+steps.push({
+  title: "就學史 · 發展史",
+  desc: "",
+  html: `
+  <div class="card">
+    ${radioGroup('school_status','是否就學',['否', '是-幼兒園普通班', '是-幼兒園特幼班', '是-發展中心', opt('是-其他',{name:'school_status_other',type:'text'})])}
+    ${radioGroup('school_duration','就學時間',['未滿1年','1-2年','2-3年','3年以上'])}
+    <div class="row-2">
+      ${textField('school_name','學校/托育幼教機構名稱')}
+      ${(()=>radioGroup('school_class','目前為',['托嬰中心','幼幼班','小班','中班','大班']))()}
+    </div>
+  </div>
+  <div class="card">
+    ${radioGroup('no_delay_before_2','2歲前是否覺得孩童有發展較慢的部分',['不覺得有較慢的部分','有覺得較慢，以下年齡若還記得請填寫'])}
+    <div class="subcard">
+      <div class="row-3">
+        <div class="field"><label class="field-label">翻身</label><input type="number" name="dev_turn_over" placeholder="個月"></div>
+        <div class="field"><label class="field-label">坐</label><input type="number" name="dev_sit" placeholder="個月"></div>
+        <div class="field"><label class="field-label">爬</label><input type="number" name="dev_crawl" placeholder="個月"></div>
+        <div class="field"><label class="field-label">扶走</label><input type="number" name="dev_walk_assisted" placeholder="個月"></div>
+        <div class="field"><label class="field-label">獨站</label><input type="number" name="dev_stand_alone" placeholder="個月"></div>
+        <div class="field"><label class="field-label">行走</label><input type="number" name="dev_walk" placeholder="個月"></div>
+        <div class="field"><label class="field-label">用手指捏餅乾吃</label><input type="number" name="dev_pinch" placeholder="個月"></div>
+        <div class="field"><label class="field-label">第一個有意義的字</label><input type="number" name="dev_first_word" placeholder="個月"></div>
+        <div class="field"><label class="field-label">叫名字有反應</label><input type="number" name="dev_respond_name" placeholder="個月"></div>
+        <div class="field"><label class="field-label">揮手表示再見</label><input type="number" name="dev_wave_bye" placeholder="個月"></div>
+      </div>
+    </div>
+  </div>`
+});
+
+// ---------- Step 6：日常生活功能 ----------
+steps.push({
+  title: "日常生活功能",
+  desc: `<span class="must-check">孩子能自己做到的請打勾</span>`,
+  html: `
+  <div class="card">
+    <div class="subcard-title">進食</div>
+    ${checkboxGroup('feeding_milestones','',['自己會拿奶瓶喝奶或拿餅乾吃(1歲)','會用聲音或動作表達想吃東西或想喝水(1-1.5歲)','自己用湯匙吃東西(1.5-2歲)','可使用吸管喝飲料(1.5歲)','自己可以雙手拿著杯子喝水(2.5歲)','自己用筷子夾食物吃(5.5-6歲)'],{required:true})}
+    ${radioGroup('feeding_level','整體而言',['可以獨立完成吃飯','需協助完成吃飯','吃飯的過程完全依賴'])}
+  </div>
+  <div class="card">
+    <div class="subcard-title">盥洗</div>
+    ${checkboxGroup('bathing_milestones','',['別人幫忙洗澡時，會配合抬手或抬腳(1.5-2歲)','洗手時，可雙手互相搓洗(2-3歲)','能獨立完成洗手及擦乾(4歲)','可自行刷牙(4歲)','在少許協助或監督下，可自己洗臉、洗澡及擦乾(5-6歲)', opt('其他',{name:'bathing_other',type:'text'})],{required:true})}
+    ${radioGroup('bathing_level','整體而言',['可以獨立完成所有盥洗功能(包含洗手、洗澡、刷牙)','需協助','完全依賴'])}
+  </div>
+  <div class="card">
+    <div class="subcard-title">如廁</div>
+    ${checkboxGroup('toileting_milestones','',['尿布濕了或髒了時，會有不舒服的表現(1歲)','可主動表達要尿尿(2.5歲)','白天可規律如廁，僅偶爾尿濕褲子或大便在褲子(3歲)','可自行完成所有如廁步驟包括穿脫褲子、擦拭、沖水及洗手(5歲)'],{required:true})}
+    ${radioGroup('toileting_level','整體而言',['可以獨立完成上廁所', '需協助完成上廁所', '目前無法自行上廁所或需要包尿布'])}
+  </div>
+  <div class="card">
+    <div class="subcard-title">穿衣技巧 <span class="field-hint">（可獨立完成=1；需協助=2；完全不會=3）</span></div>
+    <div class="row-2">
+      ${radioGroup('dress_on_shirt','衣',['1 可獨立完成','2 需協助','3 完全不會'],{required:true})}
+      ${radioGroup('dress_on_pants','褲',['1 可獨立完成','2 需協助','3 完全不會'],{required:true})}
+      ${radioGroup('dress_on_shoes','鞋',['1 可獨立完成','2 需協助','3 完全不會'],{required:true})}
+      ${radioGroup('dress_on_socks','襪',['1 可獨立完成','2 需協助','3 完全不會'],{required:true})}
+    </div>
+    <div class="subcard-title" style="margin-top:16px;">脫衣技巧</div>
+    <div class="row-2">
+      ${radioGroup('dress_off_shirt','衣',['1 可獨立完成','2 需協助','3 完全不會'],{required:true})}
+      ${radioGroup('dress_off_pants','褲',['1 可獨立完成','2 需協助','3 完全不會'],{required:true})}
+      ${radioGroup('dress_off_shoes','鞋',['1 可獨立完成','2 需協助','3 完全不會'],{required:true})}
+      ${radioGroup('dress_off_socks','襪',['1 可獨立完成','2 需協助','3 完全不會'],{required:true})}
+    </div>
+    ${checkboxGroup('dressing_milestones','其他發展里程碑',['可自己脫掉外套或鞋子(不含扣子鞋帶)(2歲)','可自己穿上襪子、鞋子(可能穿錯，不含繫鞋帶)(3歲)','可以自己穿上衣(3.5歲)','可自己脫套頭的衣服(4歲)','可以扣一般大小的扣子(4.5歲)','可完全獨立穿脫衣物(5-6歲)'],{required:true})}
+  </div>
+  <div class="card">
+    ${radioGroup('outing_mobility','外出',['可獨立行走','常需要抱/坐推車','完全要抱/坐推車'])}
+    <div class="inline-fields">
+      <span style="font-size:14px;">家住</span><input type="number" class="mini" name="outing_floor" placeholder="樓層" style="max-width:80px;"><span style="font-size:14px;">樓</span>
+    </div>
+    ${checkboxGroup('outing_method','平常進出以',['家人抱','搭電梯','爬樓梯'])}
+  </div>`
+});
+
+// ---------- Step 7：學習方面 ----------
+steps.push({
+  title: "學習方面",
+  desc: "",
+  html: `
+  <div class="card">
+    <div class="field">
+      <span class="field-label">認知能力</span>
+      <div class="checkbox-row">
+        <label class="opt"><input type="checkbox" name="cognitive_skills" value="點數">點數</label>
+        <label class="opt"><input type="checkbox" name="cognitive_skills" value="顏色">顏色</label>
+        <label class="opt"><input type="checkbox" name="cognitive_skills" value="形狀">形狀</label>
+        <label class="opt"><input type="checkbox" name="cognitive_skills" value="生活用品命名">生活用品命名</label>
+        <label class="opt"><input type="checkbox" name="cognitive_skills" value="數字">數字<input type="number" class="sub-input" name="cognitive_number_from" placeholder="從" style="width:55px !important;">～<input type="number" class="sub-input" name="cognitive_number_to" placeholder="到" style="width:55px !important;"></label>
+      </div>
+    </div>
+    ${checkboxGroup('learning_attitude','學習態度',['主動學習','被動接受','逃避學習','依興趣而有所不同'],{required:true})}
+    ${checkboxGroup('cooperation','配合度',['優良','需稱讚','需條件交換','需視個案心情', opt('其他',{name:'cooperation_other',type:'text'})],{required:true})}
+    ${checkboxGroup('attention','注意力',['優良','需提醒','需多次叫喚', opt('需以動作限制',{name:'attention_duration',type:'number',placeholder:'約略持續分鐘'})],{required:true})}
+    ${checkboxGroup('impulse_control','衝動控制',['優良','動作急躁','無法等待說明','會自行離座', opt('其他',{name:'impulse_control_other',type:'text'})],{required:true})}
+    ${checkboxGroup('instruction_understanding','指令理解',['無法完成施測','需肢體引導','需示範','需放慢速度','需重複指令','需分解指令','可理解多步驟指令'],{required:true})}
+  </div>`
+});
+
+// ---------- Step 8：遊戲和人際互動 ----------
+steps.push({
+  title: "遊戲和人際互動",
+  desc: "",
+  html: `
+  <div class="card">
+    ${checkboxGroup('expression','表達能力',['明確的口語','含糊的言語','動作','哭鬧','不會表達', opt('其他',{name:'expression_other',type:'text'})],{required:true})}
+    ${checkboxGroup('social_interaction','人際互動',['經常獨自玩耍','僅與家人互動','少數同儕','相處融洽', opt('其他',{name:'social_interaction_other',type:'text'})],{required:true})}
+    ${checkboxGroup('eye_contact','眼神對視',['可看人說話','逃避眼神交會'],{required:true})}
+    ${checkboxGroup('play_type','遊戲方式-類型',['功能性及探索性遊戲','想像性遊戲','象徵性與角色扮演遊戲','建構性遊戲', opt('規則性遊戲',{name:'play_type_rule_example',type:'text',placeholder:'如123木頭人、棋藝或桌遊'})])}
+    ${checkboxGroup('play_social','遊戲方式-社交層級',['可獨自玩一段時間','可玩二人的遊戲(如親子或手足)','可參與三人以上的團體遊戲'])}
+    ${checkboxGroup('favorite_toys','日常喜歡玩具',['聲光玩具','布偶','扮家家酒','圖卡','堆疊積木','拼圖','平板電腦或手機', opt('其他',{name:'favorite_toys_other',type:'text'})])}
+  </div>`
+});
+
+// ---------- Step 9：日常生活作息表 ----------
+function scheduleGroup(prefix, label, options){
+  return checkboxGroup(prefix, label, options);
+}
+steps.push({
+  title: "日常生活作息表",
+  desc: "",
+  html: `
+  <div class="card">
+    <div class="subcard-title">平日（星期一到星期五）</div>
+    ${scheduleGroup('weekday_morning','上午',['上學','家中','才藝', opt('其他',{name:'weekday_morning_other',type:'text'})])}
+    ${scheduleGroup('weekday_afternoon','下午',['上學','家中','才藝', opt('其他',{name:'weekday_afternoon_other',type:'text'})])}
+    ${scheduleGroup('weekday_evening','晚上',['上學','家中','才藝', opt('其他',{name:'weekday_evening_other',type:'text'})])}
+    <div class="subcard-title" style="margin-top:16px;">假日（星期六、日）</div>
+    ${scheduleGroup('weekend_morning','上午',['家中', opt('其他',{name:'weekend_morning_other',type:'text'})])}
+    ${scheduleGroup('weekend_afternoon','下午',['家中', opt('其他',{name:'weekend_afternoon_other',type:'text'})])}
+    ${scheduleGroup('weekend_evening','晚上',['家中', opt('其他',{name:'weekend_evening_other',type:'text'})])}
+  </div>
+  <div class="card">
+    <div class="subcard-title">生活作息及參與 <span class="must-check">（孩子能自己做到的請打勾）</span></div>
+    ${checkboxGroup('routine_milestones','規律作息',['規律睡眠或休息習慣(6-18個月)','吃飯或點心時間，自己坐到位子上準備吃東西(1.5-2歲)','在大人陪同下，自己上床、蓋被子睡覺(2-2.5歲)','自己會去完成例行常規，如洗手、擦乾，再來拿東西吃(4-4.5歲)','在提醒下，自己收玩具、去刷牙，然後上床睡覺(4-4.5歲)'],{required:true})}
+    ${checkboxGroup('self_management_milestones','管理自己的事物',['依要求將玩具或書放置好或歸位(1.5-2歲)','常用物品使用後會自動歸位(2.5-3歲)','能收拾好個人的物品，如文具、玩具、餐具等到固定的位置等(4-4.5歲)'],{required:true})}
+    ${checkboxGroup('household_help_milestones','主動協助家庭事務',['看到大人做事會要幫忙，如拿尿布去丟掉、拿東西去放好，或拿東西給收銀員(2歲)','摺簡單的衣物，如毛巾，但還摺不整齊(2.5歲)','接聽電話，會叫要找的人(3歲)','協助簡單的家事，如擺碗筷，擦桌子(4.5-5歲)','自己摺衣服、涼被(4.5-5歲)','可負責簡單的家事，如負責盛每一餐的飯(5.5-6歲)'],{required:true})}
+  </div>
+  <div class="card">
+    ${checkboxGroup('favorite_activities','日常生活中喜歡的動作活動',['騎三/四輪腳踏車','球類','溜滑梯','單槓、攀爬類型的活動','戶外跑跳','室內運動遊樂場','公園', opt('其他',{name:'favorite_activities_other',type:'text'})])}
+    <div class="field">
+      <span class="field-label">戶外運動之頻率</span>
+      <div class="inline-fields">
+        <span style="font-size:14px;">每週</span><input type="number" class="mini" name="outdoor_freq_times" style="max-width:70px;"><span style="font-size:14px;">次，每次</span><input type="number" class="mini" name="outdoor_freq_hours" style="max-width:70px;"><span style="font-size:14px;">小時</span>
+      </div>
+    </div>
+    ${radioGroup('therapy_history','是否接受過療育課程',['否','是'])}
+    ${checkboxGroup('therapy_types_selected','若為「是」，請勾選課程類型（可複選）',['物理治療','職能治療','語言治療','心理治療', opt('其他',{name:'therapy_other_type',type:'text',placeholder:'請說明類型'})])}
+    <div class="field-hint" style="margin:-8px 0 10px;">請針對有接受的類型，填寫下方對應的細節</div>
+    ${therapyDetailBlock('pt','物理治療')}
+    ${therapyDetailBlock('ot','職能治療')}
+    ${therapyDetailBlock('st','語言治療')}
+    ${therapyDetailBlock('psych','心理治療')}
+    ${therapyDetailBlock('other','其他治療')}
+  </div>`
+});
+
+// ---------- Step 10：環境支持 ----------
+steps.push({
+  title: "環境支持",
+  desc: "",
+  html: `
+  <div class="card">
+    ${radioGroup('disability_booklet','身心障礙手冊',['無手冊或手冊需求', opt('已持有',{name:'disability_booklet_detail',type:'text',placeholder:'障別/程度',width:'wide'}),'有申請需求'])}
+    ${radioGroup('illness_card','重大傷病卡',['無', opt('已持有',{name:'illness_card_period',type:'text',placeholder:'持有期限（年份）'})])}
+  </div>
+  <div class="card">
+    <div class="field-label">需求之輔具種類 <span class="field-hint">（若無輔具需求可略過此區）</span></div>
+    ${checkboxGroup('assist_upper_splint','上肢副木',['對掌副木','豎腕副木','固定副木','功能性副木', opt('其他',{name:'assist_upper_splint_other',type:'text'})])}
+    ${checkboxGroup('assist_lower_splint','下肢副木',['短腿副木','長腿副木', opt('其他',{name:'assist_lower_splint_other',type:'text'})])}
+    ${textField('assist_upper_device','上肢輔具')}
+    ${checkboxGroup('assist_lower_device','下肢輔具',['踝足支架','短腿支架','長腿支架','足踝矯正鞋','髖關節脫臼架','鞋墊', opt('其他',{name:'assist_lower_device_other',type:'text'})])}
+    ${textField('assist_trunk_device','軀幹輔具')}
+    ${checkboxGroup('assist_positioning','擺位輔具',['特製擺位椅','站立架', opt('其他',{name:'assist_positioning_other',type:'text'})])}
+    ${checkboxGroup('assist_mobility','移位輔具',['轉位輔具','柺杖','助行器','輪椅', opt('其他',{name:'assist_mobility_other',type:'text'})])}
+    ${checkboxGroup('assist_communication','溝通輔具',['溝通板','語言訓練系統','圖卡或照片','語音溝通器', opt('其他',{name:'assist_communication_other',type:'text'})])}
+    ${checkboxGroup('assist_daily_living','日常生活輔具',['進食輔具','書寫輔具','著衣輔具','盥洗輔具','人機介面輔具','休閒輔具', opt('其他',{name:'assist_daily_living_other',type:'text'})])}
+    ${checkboxGroup('assist_hearing','聽覺輔具',['助聽器','人工電子耳','調頻系統', opt('其他助聽輔具',{name:'assist_hearing_other',type:'text'})])}
+    ${checkboxGroup('assist_vision','視覺輔具',['放大鏡', opt('其他',{name:'assist_vision_other',type:'text'})])}
+    ${textareaField('assist_environment_consult','無障礙環境諮商與設計')}
+  </div>`
+});
+
+// ---------- Step 11：養育史（心智科用） ----------
+steps.push({
+  title: "個案嬰幼兒時期養育史",
+  desc: "",
+  html: `
+  <div class="card">
+    ${radioGroup('caregiver_before_2','兩歲前主要養育者',['父母(含白天委由他人、夜間親自照顧)','褓姆/親友/托育機構照顧平日、父母假日', opt('其他',{name:'caregiver_before_2_other',type:'text',placeholder:'如：頻頻更換照顧者'})])}
+    ${checkboxGroup('temperament_before_3','三歲前氣質',['高敏感(怕熱/怕吵/不喜歡被抱/皮膚敏感/聽覺敏感)','低敏感(安靜好帶)','感覺特殊異常(不穩定)','活動量高','活動量低','夜晚不睡','飲食不定時','怕生','黏人、難分離','易怒、易啼哭','拒絕新食物/衣物','易分心','堅持度高','新環境慢熟','喜歡自己玩'])}
+    ${checkboxGroup('development_before_5','五歲前發展',['身體發育較慢','認知學習較慢','講話較慢或不清楚','動作發展慢或不協調','情緒易哭鬧、生氣不易安撫','人際社會互動較笨拙或孤僻畏縮','其他疑似發展異常', opt('其他特殊情形',{name:'development_before_5_other',type:'text',placeholder:'如：家庭變故、疑似受虐'})])}
+  </div>`
+});
+
+// ---------- Step 12：本次就診動機與擔心程度量表 ----------
+const concernScaleLabels = [{value:'0',short:'無'},{value:'1',short:'一點點'},{value:'2',short:'普通'},{value:'3',short:'很擔心'}];
+function concernItems(prefix, arr){
+  return arr.map((label,i)=>({label, name:`concern_${prefix}_${i}`}));
+}
+steps.push({
+  title: "本次就診動機",
+  desc: "",
+  html: `
+  <div class="card">
+    ${checkboxGroup('visit_motivation','本次就診主要動機',['確定診斷或遲緩原因','入學前轉銜鑑定','增加子女教養方法與技巧','增加療育相關知識','了解評估後的療育資源','申請社會福利與補助','教育、安置、治療機構諮詢','追蹤評估', opt('其他',{name:'visit_motivation_other',type:'text'})])}
+    ${radioGroup('first_visit','是否為初次到本院進行評估',['是','否'])}
+    ${checkboxGroup('referral_source','本次進入醫院早療評估途徑',[opt('科醫師轉介',{name:'referral_dept',type:'text',placeholder:'科別'}),'早產兒追蹤','學校老師建議(含幼教體系建議)','早療中心轉介','案家主動求助','親友告知','療育個案追蹤', opt('其他',{name:'referral_source_other',type:'text'})])}
+  </div>
+  <div class="card">
+    <div class="step-title" style="font-size:15px;">請將下列所擔心的問題依擔心程度打勾</div>
+    <div class="step-desc">「0」：無擔心，「1」：一點點擔心，「2」：普通，「3」：很擔心</div>
+    <div class="concern-cat">動作</div>
+    ${concernItems('motor',['大動作發展慢','動作發展慢/協調不好','動作不靈活、平衡問題(常跌倒)','動作慢吞吞','局部肢體問題','手部動作學習慢']).map(it=>scaleBlock('',[it],concernScaleLabels)).join('')}
+    <div class="concern-cat">語言溝通</div>
+    ${concernItems('language',['講話慢/講話不清楚(表達差)','發音不清楚/口吃','答非所問/不會回答']).map(it=>scaleBlock('',[it],concernScaleLabels)).join('')}
+    <div class="concern-cat">情緒</div>
+    ${concernItems('emotion',['情緒不穩定','愛哭','憂鬱/焦慮/害怕情緒','易焦慮','情緒失調/行為暴衝','過動/衝動','急躁','易生氣','不明原因的身體症狀(如持續疼痛、肢體麻痺)','幻聽/幻視/妄想(如擔心受到監視/有人要害他)','活動量高、好動','注意力不集中、易分心/健忘']).map(it=>scaleBlock('',[it],concernScaleLabels)).join('')}
+    <div class="concern-cat">認知</div>
+    ${concernItems('cognition',['認知發展遲緩']).map(it=>scaleBlock('',[it],concernScaleLabels)).join('')}
+    <div class="concern-cat">行為</div>
+    ${concernItems('behavior',['人際溝通/互動有困難','特殊興趣或玩法(排直、疊高、旋轉)','堅持固著的生活模式','強迫行為(拔髮/咬指甲/摳皮膚)','身體出現怪動作或發出怪聲音(怪異言行)','不太理人','不易和同儕建立關係','易和同儕起衝突','怕陌生人','不太能融入團體','不守團體規則','不喜歡上學','有攻擊性行為(如：打人、咬人)','自傷行為(如：撞頭、摳手)']).map(it=>scaleBlock('',[it],concernScaleLabels)).join('')}
+    <div class="concern-cat">學習</div>
+    ${concernItems('study',['學習缺乏動機(學習動機低落)','學業成就低落','學習慢','怕學習','書寫閱讀障礙','理解、邏輯、推理不佳']).map(it=>scaleBlock('',[it],concernScaleLabels)).join('')}
+  </div>
+  <div class="card">
+    ${checkboxGroup('other_concerns','除了上述勾選之外，是否有以下擔心之問題？',['品行問題(偷竊/說謊/暴力)','逃學/拒學/懼學','暴食/厭食/挑食(飲食或吃飯問題)','夜尿/白天尿失禁/遺糞(大小便問題)','失眠(入睡困難/淺眠多夢/早醒)','夢話/夢遊/夜驚','性別/性向發展困擾','不當性遊戲/性侵','自傷自殺','身體情緒受虐或疏忽','親子關係失調','手足關係問題','師長管教不當(學校管教問題)','師生關係問題','校園霸凌','主要親屬分離/死亡','改變住所(如：安置到機構)','聽力問題','視力問題','不知如何教導或幫助孩子'],{hint:'(兒童心智科問診用)'})}
+    ${textareaField('other_concerns_detail','其他問題請敘述')}
+  </div>`
+});
+
+// ---------- Step 13：心智科就醫史與通報意願 ----------
+steps.push({
+  title: "就醫史 · 通報轉介意願",
+  desc: "",
+  html: `
+  <div class="card">
+    ${textareaField('psych_visit_history','是否曾經於兒童青少年精神/身心門診(心智科)就醫？若「有」請敘述於下方')}
+  </div>
+  <div class="card legal">
+    依《兒童及少年福利與權益保障法》第32條規定：「各類社會福利、教育及醫療機構，發現有疑似發展遲緩兒童，應通報直轄市、縣（市）主管機關...」<br><br>
+    若您的孩子評估篩檢後為確定(疑似)發展遲緩，本院會依法協助通報給兒童所屬戶籍地之早療資源中心，以利提供更充足之早療相關資源與療育訊息。
+  </div>
+  <div class="card">
+    ${radioGroup('referral_willingness','您對於未來早療通報轉介中心與您主動連繫的期待意願及資源提供之態度為何？',['意願高，希望了解更多資源','可聯繫，請不需過於頻繁','有需求再自行聯繫即可'])}
+  </div>`
+});
+
+// ---------- Step 14：滿意度調查 ----------
+const satisfactionScale = [{value:'1',short:'非常不滿意'},{value:'2',short:'不滿意'},{value:'3',short:'普通'},{value:'4',short:'滿意'},{value:'5',short:'非常滿意'}];
+steps.push({
+  title: "評估滿意度調查",
+  desc: "為了提升我們的服務品質，請您花費幾分鐘填寫以下問卷",
+  html: `
+  <div class="card">
+    ${scaleBlock('環境因素',[
+      {label:'您對於往返交通所需花費的時間',name:'sat_env_transport'},
+      {label:'您對於在就診及檢查上之便利性',name:'sat_env_convenience'}
+    ], satisfactionScale, {required:true})}
+  </div>
+  <div class="card">
+    ${scaleBlock('醫師部分',[
+      {label:'您對於看診過程所需要的時間',name:'sat_doc_time'},
+      {label:'您對於醫師與孩子的互動方式感到',name:'sat_doc_child'},
+      {label:'您對於醫師與家長的互動方式感到',name:'sat_doc_parent'},
+      {label:'您對於醫師在評估結果解釋的詳細程度',name:'sat_doc_explain'}
+    ], satisfactionScale, {required:true})}
+  </div>
+  <div class="card">
+    ${scaleBlock('專業人員評估部分',[
+      {label:'對於兒童發展聯合評估中心的測驗工具',name:'sat_prof_tools'},
+      {label:'對於兒童發展聯合評估中心的環境滿意度',name:'sat_prof_env'},
+      {label:'您對於評估進行過程中所需要花費的時間感到',name:'sat_prof_time'},
+      {label:'您對於治療師與孩子的互動方式感到',name:'sat_prof_child'},
+      {label:'您對於治療師與家長的互動方式感到',name:'sat_prof_parent'},
+      {label:'您對於治療師的諮詢服務滿意度感到',name:'sat_prof_service'}
+    ], satisfactionScale, {required:true})}
+  </div>
+  <div class="card">
+    ${scaleBlock('整體評估效果',[
+      {label:'整體而言，您對於本院的工作人員感到',name:'sat_overall_staff'},
+      {label:'整體而言，您對於本院的外在環境感到',name:'sat_overall_env'},
+      {label:'整體而言，您對整個評估流程感到',name:'sat_overall_process'}
+    ], satisfactionScale, {required:true})}
+    ${textareaField('sat_other_comments','其他意見，例如：您還希望本中心能再提供哪方面的服務呢？')}
+  </div>`
+});
+
+/* =========================================================
+   渲染與換頁邏輯
+   ========================================================= */
+const stepsContainer = document.getElementById('steps');
+steps.forEach((s,i)=>{
+  const div = document.createElement('div');
+  div.className = 'step' + (i===0 ? ' active' : '');
+  div.dataset.index = i;
+  div.innerHTML = `<div class="step-title">${s.title}</div>${s.desc?`<div class="step-desc">${s.desc}</div>`:''}${s.html}`;
+  stepsContainer.appendChild(div);
+});
+
+let current = 0;
+const total = steps.length;
+const progressBar = document.getElementById('progress-bar');
+const stepCounter = document.getElementById('step-counter');
+const sectionSub = document.getElementById('section-title-sub');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+const btnSubmit = document.getElementById('btn-submit');
+const doneScreen = document.getElementById('done-screen');
+const mainForm = document.getElementById('mainForm');
+
+function render(){
+  document.querySelectorAll('.step').forEach((el,i)=>{
+    el.classList.toggle('active', i===current);
+  });
+  progressBar.style.width = `${(current/(total-1))*100}%`;
+  stepCounter.textContent = `第 ${current+1} / ${total} 節`;
+  sectionSub.textContent = steps[current].title;
+  btnPrev.disabled = current===0;
+  btnNext.style.display = current===total-1 ? 'none' : 'inline-block';
+  btnSubmit.style.display = current===total-1 ? 'inline-block' : 'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function clearFieldErrors(stepEl){
+  stepEl.querySelectorAll('.field.field-error').forEach(f=>f.classList.remove('field-error'));
+}
+
+function validateStep(stepIndex){
+  const stepEl = document.querySelector(`.step[data-index="${stepIndex}"]`);
+  if(!stepEl) return true;
+  clearFieldErrors(stepEl);
+
+  let firstErrorEl = null;
+  const checkedRadioNames = new Set();
+
+  // 一般必填欄位（文字/日期/數字/單選）
+  const requiredInputs = stepEl.querySelectorAll('[required]');
+  for(const inp of requiredInputs){
+    const field = inp.closest('.field');
+    if(inp.type === 'radio'){
+      if(checkedRadioNames.has(inp.name)) continue;
+      checkedRadioNames.add(inp.name);
+      const anyChecked = stepEl.querySelector(`input[name="${inp.name}"]:checked`);
+      if(!anyChecked){
+        if(field) field.classList.add('field-error');
+        if(!firstErrorEl) firstErrorEl = field || inp;
+      }
+    } else {
+      if(!inp.value){
+        if(field) field.classList.add('field-error');
+        if(!firstErrorEl) firstErrorEl = field || inp;
+      }
+    }
+  }
+
+  // 複選題「至少勾選一項」必填
+  const requiredCheckboxGroups = stepEl.querySelectorAll('[data-required-group]');
+  requiredCheckboxGroups.forEach(field=>{
+    const name = field.getAttribute('data-required-group');
+    const anyChecked = stepEl.querySelector(`input[name="${name}"]:checked`);
+    if(!anyChecked){
+      field.classList.add('field-error');
+      if(!firstErrorEl) firstErrorEl = field;
+    }
+  });
+
+  if(firstErrorEl){
+    firstErrorEl.scrollIntoView({behavior:'smooth', block:'center'});
+    return false;
+  }
+  return true;
+}
+
+btnPrev.addEventListener('click', ()=>{ if(current>0){ current--; render(); } });
+btnNext.addEventListener('click', ()=>{
+  if(current===0){ current++; render(); return; }
+  if(!validateStep(current)) return;
+  if(current<total-1){ current++; render(); }
+});
+
+btnSubmit.addEventListener('click', async ()=>{
+  if(!validateStep(current)) return;
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = '送出中...';
+  const formData = new FormData(mainForm);
+  try{
+    if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes('PASTE_YOUR')){
+      await fetch(GAS_WEB_APP_URL, { method:'POST', body: formData, mode:'no-cors' });
+    }
+    document.getElementById('topbar').style.display='none';
+    document.getElementById('dev-banner').style.display='none';
+    mainForm.style.display='none';
+    document.getElementById('navbar').style.display='none';
+    doneScreen.style.display='block';
+  }catch(err){
+    alert('送出時發生問題，請確認網路連線後再試一次。');
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = '送出表單';
+  }
+});
+
+if(GAS_WEB_APP_URL.includes('PASTE_YOUR')){
+  document.getElementById('dev-banner').style.display='block';
+} else {
+  document.getElementById('dev-banner').style.display='none';
+}
+
+render();
+</script>
+</body>
+</html>
