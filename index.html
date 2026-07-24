@@ -150,6 +150,25 @@
   #dev-banner{
     background:#FDECEC; color:#8A2C22; font-size:12.5px; text-align:center; padding:8px; border-bottom:1px solid #F3C9C2;
   }
+
+  #resume-banner{
+    max-width:720px; margin:16px auto 0; padding:0 16px;
+  }
+  #resume-banner-inner{
+    background:#FBF1E6; border:1px solid #EFD9B8; border-radius:12px; padding:14px 16px;
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;
+  }
+  #resume-banner-inner p{margin:0; font-size:13.5px; color:#7A5A2A; flex:1; min-width:200px;}
+  #resume-banner-actions{display:flex; gap:8px;}
+  .primary-sm{background:var(--primary); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer;}
+  .primary-sm:hover{background:var(--primary-dark);}
+  .secondary-sm{background:#fff; color:#7A5A2A; border:1px solid #EFD9B8; border-radius:8px; padding:8px 14px; font-size:13px; cursor:pointer;}
+
+  #autosave-indicator{
+    position:fixed; bottom:78px; right:16px; background:var(--primary-dark); color:#fff; font-size:12px;
+    padding:6px 12px; border-radius:999px; opacity:0; transform:translateY(6px); transition:.25s; pointer-events:none; z-index:25;
+  }
+  #autosave-indicator.show{opacity:.92; transform:translateY(0);}
 </style>
 </head>
 <body>
@@ -164,15 +183,26 @@
 </div>
 
 <main>
+  <div id="resume-banner" style="display:none;">
+    <div id="resume-banner-inner">
+      <p>偵測到您先前尚未填完的資料（<span id="resume-time"></span>），要繼續填寫嗎？</p>
+      <div id="resume-banner-actions">
+        <button type="button" id="btn-resume-continue" class="primary-sm">繼續填寫</button>
+        <button type="button" id="btn-resume-restart" class="secondary-sm">重新開始</button>
+      </div>
+    </div>
+  </div>
   <form id="mainForm">
     <div id="steps"></div>
   </form>
   <div id="done-screen" style="display:none;">
     <div class="check">✅</div>
     <h2>感謝您完成填寫</h2>
-    <p style="color:var(--text-muted);">您的資料已送出，將由職能治療師於評估前先行閱覽，<br>若填寫過程中有任何問題，歡迎於評估當天告訴我們。</p>
+    <p style="color:var(--text-muted);">您的資料已送出，將由醫師及各專業治療師審閱，<br>若填寫過程中有任何問題，歡迎於評估當天告訴我們。</p>
   </div>
 </main>
+
+<div id="autosave-indicator">已自動儲存</div>
 
 <div id="navbar">
   <div id="navbar-inner">
@@ -794,11 +824,11 @@ function validateStep(stepIndex){
   return true;
 }
 
-btnPrev.addEventListener('click', ()=>{ if(current>0){ current--; render(); } });
+btnPrev.addEventListener('click', ()=>{ if(current>0){ current--; render(); saveDraft(); } });
 btnNext.addEventListener('click', ()=>{
-  if(current===0){ current++; render(); return; }
+  if(current===0){ current++; render(); saveDraft(); return; }
   if(!validateStep(current)) return;
-  if(current<total-1){ current++; render(); }
+  if(current<total-1){ current++; render(); saveDraft(); }
 });
 
 btnSubmit.addEventListener('click', async ()=>{
@@ -810,6 +840,7 @@ btnSubmit.addEventListener('click', async ()=>{
     if(GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes('PASTE_YOUR')){
       await fetch(GAS_WEB_APP_URL, { method:'POST', body: formData, mode:'no-cors' });
     }
+    clearDraft();
     document.getElementById('topbar').style.display='none';
     document.getElementById('dev-banner').style.display='none';
     mainForm.style.display='none';
@@ -828,6 +859,115 @@ if(GAS_WEB_APP_URL.includes('PASTE_YOUR')){
   document.getElementById('dev-banner').style.display='none';
 }
 
+/* =========================================================
+   填寫進度暫存（localStorage）
+   ------------------------------------------------------------
+   家長填寫途中若被打斷、不小心滑掉分頁或關閉瀏覽器，
+   重新打開同一台裝置、同一個瀏覽器時可以接續填寫。
+   資料只存在使用者自己的瀏覽器裡，不會上傳到任何地方，
+   送出表單成功後會自動清除暫存。
+   ========================================================= */
+const DRAFT_KEY = 'tmuh_intake_draft_v1';
+const DRAFT_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000; // 7天后自動視為過期，不主動回復
+let draftSaveTimer = null;
+
+function collectDraftData(){
+  const data = {};
+  const elements = mainForm.querySelectorAll('input[name], textarea[name], select[name]');
+  elements.forEach(el=>{
+    if(el.type === 'checkbox'){
+      if(!el.checked) return;
+      if(!data[el.name]) data[el.name] = [];
+      data[el.name].push(el.value);
+    } else if(el.type === 'radio'){
+      if(el.checked) data[el.name] = el.value;
+    } else {
+      if(el.value) data[el.name] = el.value;
+    }
+  });
+  return data;
+}
+
+function applyDraftData(data){
+  Object.keys(data).forEach(name=>{
+    const val = data[name];
+    let els;
+    try{ els = mainForm.querySelectorAll(`[name="${CSS.escape(name)}"]`); }
+    catch(e){ return; }
+    if(!els.length) return;
+    if(Array.isArray(val)){
+      els.forEach(el=>{ if(el.type==='checkbox') el.checked = val.includes(el.value); });
+    } else {
+      els.forEach(el=>{
+        if(el.type==='radio'){ el.checked = (el.value === val); }
+        else { el.value = val; }
+      });
+    }
+  });
+}
+
+function saveDraftNow(){
+  try{
+    const payload = { savedAt: Date.now(), step: current, data: collectDraftData() };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(payload));
+    flashAutosaveIndicator();
+  }catch(e){ /* 忽略儲存失敗（例如無痕模式關閉儲存），不影響正常填寫 */ }
+}
+
+function saveDraft(){
+  clearTimeout(draftSaveTimer);
+  draftSaveTimer = setTimeout(saveDraftNow, 500);
+}
+
+function clearDraft(){
+  try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
+}
+
+function flashAutosaveIndicator(){
+  const el = document.getElementById('autosave-indicator');
+  el.classList.add('show');
+  clearTimeout(flashAutosaveIndicator._t);
+  flashAutosaveIndicator._t = setTimeout(()=>el.classList.remove('show'), 1400);
+}
+
+function formatSavedTime(ts){
+  const d = new Date(ts);
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function checkForSavedDraft(){
+  let raw;
+  try{ raw = localStorage.getItem(DRAFT_KEY); }catch(e){ return; }
+  if(!raw) return;
+  let draft;
+  try{ draft = JSON.parse(raw); }catch(e){ clearDraft(); return; }
+  if(!draft || !draft.savedAt || (Date.now() - draft.savedAt > DRAFT_EXPIRY_MS)){
+    clearDraft();
+    return;
+  }
+  document.getElementById('resume-time').textContent = formatSavedTime(draft.savedAt);
+  document.getElementById('resume-banner').style.display = 'block';
+
+  document.getElementById('btn-resume-continue').onclick = ()=>{
+    applyDraftData(draft.data);
+    current = Math.min(draft.step ?? 0, total-1);
+    render();
+    document.getElementById('resume-banner').style.display = 'none';
+  };
+  document.getElementById('btn-resume-restart').onclick = ()=>{
+    clearDraft();
+    document.getElementById('resume-banner').style.display = 'none';
+  };
+}
+
+// 任何欄位變動都觸發（debounce後）自動儲存
+mainForm.addEventListener('input', saveDraft);
+mainForm.addEventListener('change', saveDraft);
+// 離開頁面前，若還有尚未寫入的暫存變更，立即補存一次
+window.addEventListener('pagehide', ()=>{ clearTimeout(draftSaveTimer); saveDraftNow(); });
+
+checkForSavedDraft();
 render();
 </script>
 </body>
